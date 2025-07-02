@@ -7,3 +7,4 @@ requests
 reportlab
 fitz
 frontend
+tools
