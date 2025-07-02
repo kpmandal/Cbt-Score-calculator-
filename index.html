@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CBT Score Calculator</title>
+</head>
+<body>
+  <h2>CBT Score Calculator</h2>
+  <form id="form">
+    <input type="text" id="name" placeholder="Enter your name" required><br><br>
+    <input type="file" id="fileInput" accept=".html,.pdf" required><br><br>
+    <button type="submit">Upload & Calculate</button>
+  </form>
+  <div id="result"></div>
+  <button id="downloadBtn" style="display:none;">Download Scorecard PDF</button>
+
+<script>
+const form = document.getElementById("form");
+const resultDiv = document.getElementById("result");
+const downloadBtn = document.getElementById("downloadBtn");
+let resultData = null;
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fileInput = document.getElementById("fileInput");
+  const name = document.getElementById("name").value;
+  const file = fileInput.files[0];
+  if (!file) return alert("Upload a file");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("http://localhost:5000/upload", {
+    method: "POST",
+    body: formData
+  });
+  const answers = await res.json();
+
+  const scoreRes = await fetch("http://localhost:5000/score", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name, answers})
+  });
+  const scoreData = await scoreRes.json();
+  resultData = scoreData;
+
+  resultDiv.innerHTML = `<p>Name: ${scoreData.name}</p>
+  <p>Date: ${scoreData.date}</p>
+  <p>Score: ${scoreData.score}</p>
+  <p>Correct: ${scoreData.correct}</p>
+  <p>Wrong: ${scoreData.wrong}</p>
+  <p>Unattempted: ${scoreData.unattempted}</p>`;
+  downloadBtn.style.display = "inline";
+});
+
+downloadBtn.addEventListener("click", async () => {
+  const res = await fetch("http://localhost:5000/download_score", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name: resultData.name, score_data: resultData})
+  });
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = resultData.name + "_scorecard.pdf";
+  a.click();
+});
+</script>
+</body>
+</html>
