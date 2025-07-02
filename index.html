@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CBT Score Calculator</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
+    textarea, input[type='text'], input[type='file'] { width: 100%; margin-bottom: 1rem; padding: 0.5rem; }
+    button { padding: 10px 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>CBT Score Calculator</h1>
+  <label>Paste Answer Key Link (HTML):</label>
+  <input type="text" id="keyLink" placeholder="https://...">
+
+  <label>Or Upload Answer Key PDF:</label>
+  <input type="file" id="pdfFile" accept=".pdf">
+
+  <label>Your Answers (e.g. 1-A, 2-B, 3-C):</label>
+  <textarea id="userAnswers" placeholder="Paste your answers here..."></textarea>
+
+  <button onclick="submitData()">Calculate Score</button>
+  <div id="result"></div>
+
+  <script>
+    async function submitData() {
+      const keyLink = document.getElementById('keyLink').value;
+      const userAnswers = document.getElementById('userAnswers').value;
+      const pdfFile = document.getElementById('pdfFile').files[0];
+
+      const formData = new FormData();
+      formData.append("user_answers", userAnswers);
+      formData.append("key_link", keyLink);
+      if (pdfFile) formData.append("pdf_file", pdfFile);
+
+      const response = await fetch("https://cbt-score-api.onrender.com/calculate", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+      let html = `<h3>Total Score: ${data.score}</h3>`;
+      html += '<table><tr><th>Q.No</th><th>Your Answer</th><th>Correct Answer</th><th>Status</th></tr>';
+      for (const row of data.details) {
+        html += `<tr><td>${row.q}</td><td>${row.your}</td><td>${row.correct}</td><td>${row.status}</td></tr>`;
+      }
+      html += '</table>';
+      document.getElementById('result').innerHTML = html;
+    }
+  </script>
+</body>
+</html>
