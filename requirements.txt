@@ -1,4 +1,4 @@
-flask
+tflask
 gunicorn
 flask-cors
 pdfplumber
@@ -6,3 +6,4 @@ beautifulsoup4
 requests
 reportlab
 fitz
+frontend
