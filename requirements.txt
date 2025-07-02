@@ -1,4 +1,0 @@
-Flask
-requests
-bs4
-pdfplumber
