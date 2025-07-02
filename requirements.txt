@@ -5,3 +5,4 @@ pdfplumber
 beautifulsoup4
 requests
 reportlab
+fitz
